@@ -50,4 +50,3 @@
 * [Alexander Moerman](https://github.com/amoerie)
 * [Harald Köstinger](https://github.com/hkoestin)
 * [Dave Stelpstra](https://github.com/davidsybren)
-* [Paul Watt](https://github.com/paul81)

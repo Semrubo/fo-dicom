@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System.Collections.Generic;
@@ -102,34 +102,64 @@ namespace Dicom.IO
         #region METHODS
 
         /// <inheritdoc />
-        public byte GetUInt8() => _reader.ReadByte();
+        public byte GetUInt8()
+        {
+            return _reader.ReadByte();
+        }
 
         /// <inheritdoc />
-        public short GetInt16() => _reader.ReadInt16();
+        public short GetInt16()
+        {
+            return _reader.ReadInt16();
+        }
 
         /// <inheritdoc />
-        public ushort GetUInt16() => _reader.ReadUInt16();
+        public ushort GetUInt16()
+        {
+            return _reader.ReadUInt16();
+        }
 
         /// <inheritdoc />
-        public int GetInt32() => _reader.ReadInt32();
+        public int GetInt32()
+        {
+            return _reader.ReadInt32();
+        }
 
         /// <inheritdoc />
-        public uint GetUInt32() => _reader.ReadUInt32();
+        public uint GetUInt32()
+        {
+            return _reader.ReadUInt32();
+        }
 
         /// <inheritdoc />
-        public long GetInt64() => _reader.ReadInt64();
+        public long GetInt64()
+        {
+            return _reader.ReadInt64();
+        }
 
         /// <inheritdoc />
-        public ulong GetUInt64() => _reader.ReadUInt64();
+        public ulong GetUInt64()
+        {
+            return _reader.ReadUInt64();
+        }
 
         /// <inheritdoc />
-        public float GetSingle() => _reader.ReadSingle();
+        public float GetSingle()
+        {
+            return _reader.ReadSingle();
+        }
 
         /// <inheritdoc />
-        public double GetDouble() => _reader.ReadDouble();
+        public double GetDouble()
+        {
+            return _reader.ReadDouble();
+        }
 
         /// <inheritdoc />
-        public byte[] GetBytes(int count) => _reader.ReadBytes(count);
+        public byte[] GetBytes(int count)
+        {
+            return _reader.ReadBytes(count);
+        }
 
         /// <inheritdoc />
         public IByteBuffer GetBuffer(uint count)
@@ -142,7 +172,7 @@ namespace Dicom.IO
             else if (count >= LargeObjectSize && _readOption == FileReadOption.ReadLargeOnDemand)
             {
                 buffer = new StreamByteBuffer(_stream, _stream.Position, count);
-                _stream.Seek((int)count, SeekOrigin.Current);
+                _stream.Seek((long)count, SeekOrigin.Current);
             }
             else if (count >= LargeObjectSize && _readOption == FileReadOption.SkipLargeTags)
             {
@@ -158,34 +188,40 @@ namespace Dicom.IO
 
 #if !NET35
         /// <inheritdoc />
-        public Task<IByteBuffer> GetBufferAsync(uint count) => Task.FromResult(GetBuffer(count));
+        public Task<IByteBuffer> GetBufferAsync(uint count)
+        {
+            return Task.FromResult(this.GetBuffer(count));
+        }
 #endif
 
         /// <inheritdoc />
-        public void Skip(int count) => _stream.Seek(count, SeekOrigin.Current);
+        public void Skip(int count)
+        {
+            _stream.Seek(count, SeekOrigin.Current);
+        }
 
         /// <inheritdoc />
-        public void Mark() => _mark = _stream.Position;
+        public void Mark()
+        {
+            _mark = _stream.Position;
+        }
 
         /// <inheritdoc />
-        public void Rewind() => _stream.Position = _mark;
+        public void Rewind()
+        {
+            _stream.Position = _mark;
+        }
 
         /// <inheritdoc />
         public void PushMilestone(uint count)
         {
-            lock (_lock)
-            {
-                _milestones.Push(_stream.Position + count);
-            }
+            lock (_lock) _milestones.Push(_stream.Position + count);
         }
 
         /// <inheritdoc />
         public void PopMilestone()
         {
-            lock (_lock)
-            {
-                _milestones.Pop();
-            }
+            lock (_lock) _milestones.Pop();
         }
 
         /// <inheritdoc />
@@ -193,12 +229,16 @@ namespace Dicom.IO
         {
             lock (_lock)
             {
-                return _milestones.Count > 0 && _stream.Position >= _milestones.Peek();
+                if (_milestones.Count > 0 && _stream.Position >= _milestones.Peek()) return true;
+                return false;
             }
         }
 
         /// <inheritdoc />
-        public bool Require(uint count) => Require(count, null, null);
+        public bool Require(uint count)
+        {
+            return Require(count, null, null);
+        }
 
         /// <inheritdoc />
         public bool Require(uint count, ByteSourceCallback callback, object state)

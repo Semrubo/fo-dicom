@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -138,7 +138,7 @@ namespace Dicom
 
         protected override void ValidateString()
         {
-            this.ValueRepresentation?.ValidateString(StringValue);
+            this.ValueRepresentation?.ValidateString(_value);
         }
     }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2020 fo-dicom contributors.
+// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -162,14 +162,14 @@ namespace Dicom.Network.Client.States
                 }
                 else
                 {
-                    return await _dicomClient.TransitionToCompletedWithErrorState(_initialisationParameters, connectionClosedEvent.Exception, cancellation).ConfigureAwait(false);
+                    return await _dicomClient.TransitionToCompletedWithErrorState(_initialisationParameters, connectionClosedEvent.Exception, cancellation);
                 }
             }
 
             if (winner == onAbort)
             {
                 _dicomClient.Logger.Warn($"[{this}] Cancellation requested during association release, immediately aborting association");
-                return await _dicomClient.TransitionToAbortState(_initialisationParameters, cancellation).ConfigureAwait(false);
+                return await _dicomClient.TransitionToAbortState(_initialisationParameters, cancellation);
             }
 
             throw new DicomNetworkException("Unknown winner of Task.WhenAny in DICOM client, this is likely a bug: " + winner);

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 namespace Dicom.IO
@@ -140,14 +140,14 @@ namespace Dicom.IO
         /// <param name="offset">Offset from the start position of the file.</param>
         /// <param name="count">Number of bytes to select.</param>
         /// <returns>The specified sub-range of bytes in the file.</returns>
-        public byte[] GetByteRange(long offset, int count)
+        public byte[] GetByteRange(long offset, long count)
         {
             byte[] buffer = new byte[count];
 
             using (var fs = OpenRead())
             {
                 fs.Seek(offset, SeekOrigin.Begin);
-                fs.Read(buffer, 0, count);
+                fs.Read(buffer, 0, (int)count);
             }
 
             return buffer;

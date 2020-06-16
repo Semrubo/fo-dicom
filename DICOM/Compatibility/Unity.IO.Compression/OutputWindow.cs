@@ -113,7 +113,7 @@ namespace Unity.IO.Compression
             int copied = length;
 
             int tailLen = length - copy_end;   
-            if ( tailLen > 0) {    // this means we need to copy two parts separately
+            if ( tailLen > 0) {    // this means we need to copy two parts seperately
                 // copy tailLen bytes from the end of output window
                 System.Array.Copy(window, WindowSize - tailLen,
                                   output, offset, tailLen);

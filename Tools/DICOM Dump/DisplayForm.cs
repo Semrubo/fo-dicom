@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -150,7 +150,6 @@ namespace Dicom.Dump
 
             _image.WindowWidth += e.X - _lastPosition.X;
             _image.WindowCenter += e.Y - _lastPosition.Y;
-            _image.UseVOILUT = false;
 
             _lastPosition = e.Location;
 
@@ -207,7 +206,6 @@ namespace Dicom.Dump
             {
                 _image.WindowWidth = options.WindowWidth;
                 _image.WindowCenter = options.WindowCenter;
-                _image.UseVOILUT = options.UseVOILUT;
 
                 DisplayImage(_image);
             }

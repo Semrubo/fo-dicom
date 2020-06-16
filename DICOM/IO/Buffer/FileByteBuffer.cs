@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 namespace Dicom.IO.Buffer
@@ -21,7 +21,7 @@ namespace Dicom.IO.Buffer
 
         public long Size { get; private set; }
 
-        public byte[] Data => File.GetByteRange(Position, (int)Size);
+        public byte[] Data => File.GetByteRange(Position, Size);
 
         public byte[] GetByteRange(long offset, int count)
         {

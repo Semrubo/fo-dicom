@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -73,17 +73,6 @@ namespace Dicom.Imaging
         /// Window center
         /// </summary>
         public double WindowCenter { get; set; }
-
-
-        private bool _useVOILUT = false;
-        /// <summary>
-        /// Use VOI LUT if available
-        /// </summary>
-        public bool UseVOILUT
-        {
-            get => _useVOILUT && VOILUTSequence != null;
-            set => _useVOILUT = value;
-        }
 
         /// <summary>
         /// Gets or sets the color map associated with the grayscale image.
@@ -167,14 +156,10 @@ namespace Dicom.Imaging
             if (dataset.TryGetSequence(DicomTag.ModalityLUTSequence, out DicomSequence modalityLutSequence))
                 options.ModalityLUTSequence = modalityLutSequence;
             if (dataset.TryGetSequence(DicomTag.VOILUTSequence, out DicomSequence voiLutSequence))
-            {
                 options.VOILUTSequence = voiLutSequence;
-                options.UseVOILUT = true;
-            }
 
             return options;
         }
-
 
         /// <summary>
         /// Create grayscale render options based on specified image pixel values.
@@ -212,10 +197,7 @@ namespace Dicom.Imaging
             if (dataset.TryGetSequence(DicomTag.ModalityLUTSequence, out DicomSequence modalityLutSequence))
                 options.ModalityLUTSequence = modalityLutSequence;
             if (dataset.TryGetSequence(DicomTag.VOILUTSequence, out DicomSequence voiLutSequence))
-            {
                 options.VOILUTSequence = voiLutSequence;
-                options.UseVOILUT = true;
-            }
 
             return options;
         }
@@ -258,10 +240,7 @@ namespace Dicom.Imaging
             if (dataset.TryGetSequence(DicomTag.ModalityLUTSequence, out DicomSequence modalityLutSequence))
                 options.ModalityLUTSequence = modalityLutSequence;
             if (dataset.TryGetSequence(DicomTag.VOILUTSequence, out DicomSequence voiLutSequence))
-            {
                 options.VOILUTSequence = voiLutSequence;
-                options.UseVOILUT = true;
-            }
 
             return options;
         }
@@ -355,13 +334,6 @@ namespace Dicom.Imaging
                        ? ColorTable.Monochrome1
                        : ColorTable.Monochrome2;
         }
-
-        public static GrayscaleRenderOptions CreateLinearOption(BitDepth bits, int minValue, int maxValue)
-            => new GrayscaleRenderOptions(bits)
-            {
-                WindowWidth = maxValue - minValue,
-                WindowCenter = (maxValue + minValue) / 2
-            };
 
         #endregion
     }

@@ -1,8 +1,9 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using Dicom.IO.Buffer;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Dicom.Serialization
@@ -18,9 +19,9 @@ namespace Dicom.Serialization
         /// Converts a <see cref="DicomDataset"/> to a XML-String
         /// </summary>
         /// <param name="dataset">The DicomDataset that is converted to XML-String</param>
-        public static string ConvertDicomToXML(DicomDataset dataset)
+        public static string ConvertDicomToXML(DicomDataset dataset, bool excludePixelData = false)
         {
-            string xmlString = DicomToXml(dataset);
+            string xmlString = DicomToXml(dataset, excludePixelData);
             return xmlString;
         }
 
@@ -29,9 +30,9 @@ namespace Dicom.Serialization
         /// </summary>
         /// <param name="dataset">Dataset to serialize.</param>
         /// <returns>An XML string.</returns>
-        public static string WriteToXml(this DicomDataset dataset)
+        public static string WriteToXml(this DicomDataset dataset, bool excludePixelData = false)
         {
-            return ConvertDicomToXML(dataset);
+            return ConvertDicomToXML(dataset, excludePixelData);
         }
 
         /// <summary>
@@ -39,33 +40,34 @@ namespace Dicom.Serialization
         /// </summary>
         /// <param name="file"></param>
         /// <returns>An XML string.</returns>
-        public static string WriteToXml(this DicomFile file)
+        public static string WriteToXml(this DicomFile file, bool excludePixelData = false)
         {
-            return ConvertDicomToXML(file.Dataset);
+            return ConvertDicomToXML(file.Dataset, excludePixelData);
         }
 
         #endregion
 
         #region Private Methods
 
-        private static string DicomToXml(DicomDataset dataset)
+        private static string DicomToXml(DicomDataset dataset, bool excludePixelData)
         {
             var xmlOutput = new StringBuilder();
             xmlOutput.AppendLine(@"<?xml version=""1.0"" encoding=""utf-8""?>");
             xmlOutput.AppendLine(@"<NativeDicomModel>");
 
-            DicomDatasetToXml(xmlOutput, dataset);
+            DicomDatasetToXml(xmlOutput, dataset, excludePixelData);
 
             xmlOutput.AppendLine(@"</NativeDicomModel>");
             return xmlOutput.ToString();
         }
 
-        private static void DicomDatasetToXml(StringBuilder xmlOutput, DicomDataset dataset)
+        private static void DicomDatasetToXml(StringBuilder xmlOutput, DicomDataset dataset, bool excludePixelData)
         {
             foreach (var item in dataset)
             {
                 if (item is DicomElement)
                 {
+                    if (excludePixelData && item.Tag.DictionaryEntry.Keyword.ToLower() == "pixeldata") continue;
                     DicomElementToXml(xmlOutput, (DicomElement)item);
                 }
                 else if (item is DicomSequence)
@@ -77,7 +79,7 @@ namespace Dicom.Serialization
                     {
                         xmlOutput.AppendLine($@"<Item number=""{i+1}"">");
 
-                        DicomDatasetToXml(xmlOutput, sq.Items[i]);
+                        DicomDatasetToXml(xmlOutput, sq.Items[i], excludePixelData);
 
                         xmlOutput.AppendLine(@"</Item>");
                     }

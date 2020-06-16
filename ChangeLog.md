@@ -1,19 +1,5 @@
-#### v.4.0.5 (TBD)
-* Bug fix: DicomTags of ValueRepresentation LT have not been validated.
+#### v.4.0.4 (TBD)
 
-#### v.4.0.4 (1/17/2020)
-* New feature: asynchronous counterparts to IDicomCEchoProvider, IDicomCFindProvider, IDicomCStoreProvider, IDicomCMoveProvider, IDicomCGetProvider and IDicomNServiceProvider
-* Bug fix: Prevent SSL handshake freeze from blocking the TCP listener (#923)
-* disable validation when cloning/copying existing DicomDatasets. Exceptions has been thrown when anonymizing files that contain invalid content.
-* Bug fix: FileReadOption.SkipLargeTags caused that only parts of a FragmentSequece have been read, which then lead to further errors. Now the whole FragmentSequence is skipped if only one part of this sequence is skipped.
-* Bug fix: Exception when anonymizing private tags, where the value representation is not known.
-* Implementation of IImage with ImageSharp, which is pure managed and can be used on any operation system. (#693)
-* Add link to wiki entry in DicomCodecException (#948)
-* Bug fix: DicomDataset.TryGetString throws if the element is an empty number-based element (#932)
-* Bug fix: Some continuations in the new DicomClient were not properly marked with ConfigureAwait, which could cause trouble
-* Bug fix: VOI LUT was not applied correctly (#949)
-* Add ReferencedFilmSessionSequence in N-Create message of BasicFilmBox (#967)
-* Bug fix: Exception when cloning to Jpeg Process2_4 when parameters are set to null.
 
 #### v.4.0.3 (9/21/2019)
 * Bug fix: Exception when adding an element of VR UR/UT/LT/ST with empty value (#915)

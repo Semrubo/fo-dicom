@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -181,7 +181,7 @@ namespace Dicom.Network.Client
 
             using (var server = CreateServer<DicomCEchoProvider>(port))
             {
-                while (!server.IsListening) await Task.Delay(50).ConfigureAwait(false);
+                while (!server.IsListening) await Task.Delay(50);
 
                 var actual = 0;
 
@@ -215,7 +215,7 @@ namespace Dicom.Network.Client
             using (
                 var server = CreateServer<DicomCEchoProvider>(port))
             {
-                await Task.Delay(500).ConfigureAwait(false);
+                await Task.Delay(500);
                 Assert.True(server.IsListening, "Server is not listening");
 
                 var actual = 0;
@@ -275,7 +275,7 @@ namespace Dicom.Network.Client
                 client.AssociationRejected += (sender, args) => reason = args.Reason;
 
                 await client.AddRequestAsync(new DicomCEchoRequest()).ConfigureAwait(false);
-                var exception = await Record.ExceptionAsync(() => client.SendAsync()).ConfigureAwait(false);
+                var exception = await Record.ExceptionAsync(() => client.SendAsync());
 
                 Assert.Equal(DicomRejectReason.CalledAENotRecognized, reason);
                 Assert.NotNull(exception);
@@ -407,7 +407,7 @@ namespace Dicom.Network.Client
                 var client = CreateClient("127.0.0.1", port, false, "SCU", "ANY-SCP");
                 await client.AddRequestAsync(new DicomCEchoRequest()).ConfigureAwait(false);
                 Assert.True(client.IsSendRequired);
-                await client.SendAsync().ConfigureAwait(false);
+                await client.SendAsync();
                 Thread.Sleep(100);
 
                 await client.AddRequestAsync(new DicomCEchoRequest()).ConfigureAwait(false);
@@ -454,7 +454,7 @@ namespace Dicom.Network.Client
                             Interlocked.Increment(ref counter);
                             flag.Set();
                         }
-                    }).ConfigureAwait(false);
+                    });
                 Assert.False(client.IsSendRequired);
 
                 flag.Wait(1000);
@@ -474,7 +474,7 @@ namespace Dicom.Network.Client
                 var client = CreateClient("127.0.0.1", port, false, "SCU", "ANY-SCP");
                 await client.AddRequestAsync(request).ConfigureAwait(false);
 
-                var exception = await Record.ExceptionAsync(() => client.SendAsync()).ConfigureAwait(false);
+                var exception = await Record.ExceptionAsync(() => client.SendAsync());
 
                 Assert.IsType<DicomAssociationRejectedException>(exception);
             }
@@ -500,7 +500,7 @@ namespace Dicom.Network.Client
 
                 await client.AddRequestsAsync(requests).ConfigureAwait(false);
 
-                var exception = await Record.ExceptionAsync(() => client.SendAsync()).ConfigureAwait(false);
+                var exception = await Record.ExceptionAsync(() => client.SendAsync());
 
                 Assert.Null(exception);
                 Assert.Equal(expected, actual);
@@ -671,7 +671,10 @@ namespace Dicom.Network.Client
 
                         await client.AddRequestAsync(new DicomCEchoRequest
                         {
-                            OnResponseReceived = (req, res) => { Interlocked.Increment(ref numberOfResponsesReceived); }
+                            OnResponseReceived = (req, res) =>
+                            {
+                                Interlocked.Increment(ref numberOfResponsesReceived);
+                            }
                         }).ConfigureAwait(false);
                     }
                 });
@@ -682,8 +685,11 @@ namespace Dicom.Network.Client
                 {
                     await client.AddRequestAsync(new DicomCEchoRequest
                     {
-                        OnResponseReceived = (request, response) => { Interlocked.Increment(ref numberOfResponsesReceived); }
-                    }).ConfigureAwait(false);
+                        OnResponseReceived = (request, response) =>
+                        {
+                            Interlocked.Increment(ref numberOfResponsesReceived);
+                        }
+                    });
                 }
 
                 bool connected = false, associated = false;
@@ -745,8 +751,11 @@ namespace Dicom.Network.Client
                 {
                     await client.AddRequestAsync(new DicomCEchoRequest
                     {
-                        OnResponseReceived = (request, response) => { Interlocked.Increment(ref numberOfResponsesReceived); }
-                    }).ConfigureAwait(false);
+                        OnResponseReceived = (request, response) =>
+                        {
+                            Interlocked.Increment(ref numberOfResponsesReceived);
+                        }
+                    });
                 }
 
                 bool connected = false, associated = false, aborted = false;
@@ -814,7 +823,10 @@ namespace Dicom.Network.Client
                 {
                     await client.AddRequestAsync(new DicomCEchoRequest
                     {
-                        OnResponseReceived = (request, response) => { Interlocked.Increment(ref numberOfResponsesReceived); }
+                        OnResponseReceived = (request, response) =>
+                        {
+                            Interlocked.Increment(ref numberOfResponsesReceived);
+                        }
                     }).ConfigureAwait(false);
                 }
 
@@ -870,7 +882,10 @@ namespace Dicom.Network.Client
                 {
                     await client.AddRequestAsync(new DicomCEchoRequest
                     {
-                        OnResponseReceived = (request, response) => { Interlocked.Increment(ref numberOfResponsesReceived); }
+                        OnResponseReceived = (request, response) =>
+                        {
+                            Interlocked.Increment(ref numberOfResponsesReceived);
+                        }
                     }).ConfigureAwait(false);
                 }
 
@@ -986,14 +1001,10 @@ namespace Dicom.Network.Client
 
             await dicomClient.AddRequestAsync(request).ConfigureAwait(false);
 
-            try
-            {
-                return await responseCompletionSource.Task.ConfigureAwait(false);
-            }
-            finally
-            {
-                cancellationRegistration.Dispose();
-            }
+            // ReSharper disable once MethodSupportsCancellation Let's not cancel the cancellation, ha ha!
+            responseCompletionSource.Task.ContinueWith(_ => cancellationRegistration.Dispose());
+
+            return await responseCompletionSource.Task;
         }
 
         private void AllResponsesShouldHaveSucceeded(IEnumerable<DicomCEchoResponse> responses)
@@ -1227,6 +1238,7 @@ namespace Dicom.Network.Client
                         await Task.Delay(TimeSpan.FromSeconds(secondsToWait)).ConfigureAwait(false);
                         logger.Info($"Waited {secondsBetweenEachRequest} seconds, moving on to next request");
                     }
+
                 }
 
                 var responses = await Task.WhenAll(requests).ConfigureAwait(false);
@@ -1290,12 +1302,11 @@ namespace Dicom.Network.Client
         }
 
         [Theory]
-        [InlineData(2, 1, 2)]
-        [InlineData(10, 2, 5)]
-        [InlineData(10, 10, 1)]
-        [InlineData(100, 10, 10)]
-        public async Task SendAsync_MaxRequestsPerAssoc_ShouldAlwaysCreateCorrectNumberOfAssociations(int numberOfRequests, int maxRequestsPerAssoc,
-            int expectedNumberOfAssociations)
+        [InlineData(2,1,2 )]
+        [InlineData(10,2,5)]
+        [InlineData(10,10,1)]
+        [InlineData(100,10,10 )]
+        public async Task SendAsync_MaxRequestsPerAssoc_ShouldAlwaysCreateCorrectNumberOfAssociations(int numberOfRequests, int maxRequestsPerAssoc, int expectedNumberOfAssociations)
         {
             var port = Ports.GetNext();
             var logger = _logger.IncludePrefix("UnitTest");
@@ -1339,27 +1350,6 @@ namespace Dicom.Network.Client
                     Assert.InRange(provider.Requests.Count(), 0, maxRequestsPerAssoc);
                 }
             }
-        }
-
-        [Fact]
-        public async Task SendAsync_ToUnknownHost_ShouldNotLoopInfinitely()
-        {
-            var request = new DicomCEchoRequest();
-
-            var client = CreateClient("www.google.com", 4333, false, "SCU", "ANY-SCP");
-            await client.AddRequestAsync(request).ConfigureAwait(false);
-
-            Exception capturedException = null;
-            try
-            {
-                await client.SendAsync().ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                _logger.Error("Error occurred during send {e}", exception);
-                capturedException = exception;
-            }
-            Assert.NotNull(capturedException);
         }
 
         #region Support classes
@@ -1487,9 +1477,16 @@ namespace Dicom.Network.Client
                 _associations = new ConcurrentBag<DicomAssociation>();
             }
 
+            async Task WaitForALittleBit()
+            {
+                var ms = new Random().Next(10);
+                await Task.Delay(ms).ConfigureAwait(false);
+            }
+
             /// <inheritdoc />
             public async Task OnReceiveAssociationRequestAsync(DicomAssociation association)
             {
+                await WaitForALittleBit().ConfigureAwait(false);
                 foreach (var pc in association.PresentationContexts)
                 {
                     pc.SetResult(DicomPresentationContextResult.Accept);
@@ -1497,12 +1494,13 @@ namespace Dicom.Network.Client
 
                 _associations.Add(association);
 
-                await SendAssociationAcceptAsync(association).ConfigureAwait(false);
+                await SendAssociationAcceptAsync(association);
             }
 
             /// <inheritdoc />
             public async Task OnReceiveAssociationReleaseRequestAsync()
             {
+                await WaitForALittleBit().ConfigureAwait(false);
                 await SendAssociationReleaseResponseAsync().ConfigureAwait(false);
             }
 
@@ -1521,6 +1519,8 @@ namespace Dicom.Network.Client
                 _requests.Add(request);
 
                 _onRequest(request).GetAwaiter().GetResult();
+
+                WaitForALittleBit().GetAwaiter().GetResult();
 
                 if (_responseTimeout.HasValue)
                 {
@@ -1579,9 +1579,16 @@ namespace Dicom.Network.Client
                 _associations = new ConcurrentBag<DicomAssociation>();
             }
 
+            async Task WaitForALittleBit()
+            {
+                var ms = new Random().Next(10);
+                await Task.Delay(ms);
+            }
+
             /// <inheritdoc />
             public async Task OnReceiveAssociationRequestAsync(DicomAssociation association)
             {
+                await WaitForALittleBit().ConfigureAwait(false);
                 foreach (var pc in association.PresentationContexts)
                 {
                     pc.SetResult(DicomPresentationContextResult.Accept);
@@ -1589,12 +1596,13 @@ namespace Dicom.Network.Client
 
                 _associations.Add(association);
 
-                await SendAssociationAcceptAsync(association).ConfigureAwait(false);
+                await SendAssociationAcceptAsync(association);
             }
 
             /// <inheritdoc />
             public async Task OnReceiveAssociationReleaseRequestAsync()
             {
+                await WaitForALittleBit().ConfigureAwait(false);
                 await SendAssociationReleaseResponseAsync().ConfigureAwait(false);
             }
 
@@ -1611,6 +1619,8 @@ namespace Dicom.Network.Client
             public IEnumerable<DicomCGetResponse> OnCGetRequest(DicomCGetRequest request)
             {
                 _requests.Add(request);
+
+                WaitForALittleBit().GetAwaiter().GetResult();
 
                 yield return new DicomCGetResponse(request, DicomStatus.Pending);
 

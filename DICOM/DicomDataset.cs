@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -608,7 +608,7 @@ namespace Dicom
             {
                 try
                 {
-                    stringValue = element.Count == 0 ? string.Empty : element.Get<string>(-1);
+                    stringValue = element.Get<string>(-1);
                     return true;
                 }
                 catch (DicomDataException)
@@ -1039,14 +1039,7 @@ namespace Dicom
         /// <returns>Current Dataset</returns>
         public DicomDataset CopyTo(DicomDataset destination)
         {
-            if (destination != null)
-            {
-                var priorValidation = destination.ValidateItems;
-                destination.ValidateItems = false;
-                destination.AddOrUpdate(this);
-                destination.ValidateItems = priorValidation;
-            }
-
+            if (destination != null) destination.AddOrUpdate(this);
             return this;
         }
 
@@ -1060,13 +1053,7 @@ namespace Dicom
         {
             if (destination != null)
             {
-                var priorValidation = destination.ValidateItems;
-                destination.ValidateItems = false;
-                foreach (var tag in tags)
-                {
-                    destination.AddOrUpdate(GetDicomItem<DicomItem>(tag));
-                }
-                destination.ValidateItems = priorValidation;
+                foreach (var tag in tags) destination.AddOrUpdate(GetDicomItem<DicomItem>(tag));
             }
             return this;
         }
@@ -1079,13 +1066,7 @@ namespace Dicom
         /// <returns>Current Dataset</returns>
         public DicomDataset CopyTo(DicomDataset destination, DicomMaskedTag mask)
         {
-            if (destination != null)
-            {
-                var priorValidation = destination.ValidateItems;
-                destination.ValidateItems = false;
-                destination.AddOrUpdate(_items.Values.Where(x => mask.IsMatch(x.Tag)));
-                destination.ValidateItems = priorValidation;
-            }
+            destination?.AddOrUpdate(_items.Values.Where(x => mask.IsMatch(x.Tag)));
             return this;
         }
 
@@ -1624,7 +1605,7 @@ namespace Dicom
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // for detecting redundant calling of Dispose
+        private bool disposedValue = false; // for detecting renundant calling of Dispose
 
         protected virtual void Dispose(bool disposing)
         {

@@ -66,4 +66,3 @@ Platform/Mono/Dictionaries/*.xml.gz
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-/Platform/Mono/.vs/DICOM.Mono/v16

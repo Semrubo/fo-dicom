@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2020 fo-dicom contributors.
+﻿// Copyright (c) 2012-2019 fo-dicom contributors.
 // Licensed under the Microsoft Public License (MS-PL).
 
 using System;
@@ -184,7 +184,7 @@ namespace Dicom.Network
 
                 var task = client.SendAsync("127.0.0.1", port, false, "SCU", "ANY-SCP");
                 //await Task.WhenAny(task, Task.Delay(10000));
-                await task.ConfigureAwait(false);
+                await task;
                 Assert.Equal(1, counter);
             }
         }
@@ -208,7 +208,7 @@ namespace Dicom.Network
                     client.AddRequest(new DicomCEchoRequest {OnResponseReceived = (req, res) => Interlocked.Increment(ref actual)});
 
                 var task = client.SendAsync("127.0.0.1", port, false, "SCU", "ANY-SCP");
-                await Task.WhenAny(task, Task.Delay(30000)).ConfigureAwait(false);
+                await Task.WhenAny(task, Task.Delay(30000));
 
                 Assert.Equal(expected, actual);
             }
@@ -288,7 +288,7 @@ namespace Dicom.Network
                         await client.SendAsync("127.0.0.1", port, false, "SCU", "ANY-SCP");
                         _testOutputHelper.WriteLine("Sent (or timed out) #{0}", requestIndex);
                     }).ToList();
-                await Task.WhenAll(requests).ConfigureAwait(false);
+                await Task.WhenAll(requests);
 
                 Assert.Equal(expected, actual);
             }
@@ -1059,9 +1059,16 @@ namespace Dicom.Network
                 _associations = new ConcurrentBag<DicomAssociation>();
             }
 
+            async Task WaitForALittleBit()
+            {
+                var ms = new Random().Next(10);
+                await Task.Delay(ms);
+            }
+
             /// <inheritdoc />
             public async Task OnReceiveAssociationRequestAsync(DicomAssociation association)
             {
+                await WaitForALittleBit();
                 foreach (var pc in association.PresentationContexts)
                 {
                     pc.SetResult(DicomPresentationContextResult.Accept);
@@ -1075,6 +1082,7 @@ namespace Dicom.Network
             /// <inheritdoc />
             public async Task OnReceiveAssociationReleaseRequestAsync()
             {
+                await WaitForALittleBit();
                 await SendAssociationReleaseResponseAsync();
             }
 
@@ -1093,6 +1101,8 @@ namespace Dicom.Network
                 _onRequest(request);
 
                 _requests.Add(request);
+
+                WaitForALittleBit().GetAwaiter().GetResult();
 
                 return new DicomCEchoResponse(request, DicomStatus.Success);
             }
